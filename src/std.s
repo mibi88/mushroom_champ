@@ -28,26 +28,78 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
-.ifndef shell_inc
-shell_inc = 0
+.include "std.inc"
 
-; Clear everything
-; Uses all the registers.
-.global CLEAR
+.segment "ZEROPAGE"
 
-; puts for string with a length < 256.
-; Pass the pointer in A (lower byte) and X (upper byte).
-; Uses all registers.
-.global PUTS
+ptr:        .res 2
 
-; Print a single char
-; Pass the char in A
-; Uses A and X.
-.global PUTC
+.segment "TEXT"
 
-; Move the cursor.
-; Pass X in X and Y in A.
-; Uses A and X.
-.global MOVE
+.proc STRLEN
+        STA ptr
+        STX ptr+1
 
-.endif
+        LDY #$00
+
+    LOOP:
+        INY
+        LDA (ptr), Y
+        BNE LOOP
+
+    DONE:
+        RTS
+.endproc
+
+.proc HTOA
+        STY ptr
+        STX ptr+1
+
+        LDY #$00
+
+        TAX
+
+        ; Get the high nibble
+        LSR
+        LSR
+        LSR
+        LSR
+
+        ADC #$30
+
+        ; Check if it should be a letter
+        CMP #$3A
+        BCC NOT_ALPHA2
+
+        ; Make it a letter
+        ADC #($41-$3A-1)
+    NOT_ALPHA2:
+
+        STA (ptr), Y
+        INY
+
+        ; Get the low nibble
+        TXA
+
+        AND #$0F
+
+        CLC
+        ADC #$30
+
+        ; Check if it should be a letter
+        CMP #$3A
+        BCC NOT_ALPHA
+
+        ; Make it a letter
+        ADC #($41-$3A-1)
+    NOT_ALPHA:
+
+        STA (ptr), Y
+        INY
+
+        ; Make the string NUL-terminated.
+        LDA #$00
+        STA (ptr), Y
+
+        RTS
+.endproc

@@ -141,6 +141,8 @@ pal_buffer:     .res $20
         CPX #$FF
         BEQ NAM_LOAD_SKIP
 
+        INX
+
         ; Load the target address
         LDA ppu_addr+1
         STA PPUADDR

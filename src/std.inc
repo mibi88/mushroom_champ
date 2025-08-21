@@ -28,26 +28,20 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
-.ifndef shell_inc
-shell_inc = 0
+.ifndef std_inc
+std_inc = 0
 
-; Clear everything
+; strlen for strings made by up to 255 bytes.
+; Pass the lower byte in A and the upper byte of the pointer in X.
 ; Uses all the registers.
-.global CLEAR
+; Return value in Y.
+.global STRLEN
 
-; puts for string with a length < 256.
-; Pass the pointer in A (lower byte) and X (upper byte).
-; Uses all registers.
-.global PUTS
+; Convert the number in a to a NUL terminated string
+; Pass the ptr in XY (upper byte in X and lower byte in Y).
+.global HTOA
 
-; Print a single char
-; Pass the char in A
-; Uses A and X.
-.global PUTC
-
-; Move the cursor.
-; Pass X in X and Y in A.
-; Uses A and X.
-.global MOVE
+; A pointer used by various subroutines.
+.globalzp ptr
 
 .endif

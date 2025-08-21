@@ -30,13 +30,15 @@
 
 .include "nmi.inc"
 .include "shell.inc"
+.include "std.inc"
 
 .segment "ZEROPAGE"
 
 num_buffer: .res 3
-ptr:        .res 2
 
 .segment "TEXT"
+
+; TODO: Add scrolling once the bottom of the screen is reached.
 
 .proc CLEAR
         LDA #$FF
@@ -89,6 +91,7 @@ ptr:        .res 2
         RTS
 .endproc
 
+; TODO: Clean this up.
 .proc PUTS
         STA ptr
         STX ptr+1
@@ -101,10 +104,9 @@ ptr:        .res 2
         LDY #$00
 
     STRLEN:
-        LDA (ptr), Y
-        BEQ STRLEN_DONE
         INY
-        JMP STRLEN
+        LDA (ptr), Y
+        BNE STRLEN
 
     STRLEN_DONE:
 
@@ -132,6 +134,52 @@ ptr:        .res 2
         BNE LOAD_LOOP
 
         STX nam_cur
+
+        RTS
+.endproc
+
+.proc PUTC
+        LDX #$FF
+    WAIT:
+        CPX nam_cur
+        BNE WAIT
+
+        ; Load the char
+        STA nam_buffer+$FF
+        DEC nam_cur
+
+        RTS
+.endproc
+
+.proc MOVE
+        LDY #$FF
+    WAIT:
+        CPY nam_cur
+        BNE WAIT
+
+        STX ppu_addr
+        LDX #$00
+        STX ppu_addr+1
+
+        ; Shift 5 bits to the left to multiply by 32
+        ASL
+        ROL ppu_addr+1
+        ASL
+        ROL ppu_addr+1
+        ASL
+        ROL ppu_addr+1
+        ASL
+        ROL ppu_addr+1
+        ASL
+        ROL ppu_addr+1
+
+        CLC
+        ADC ppu_addr
+        STA ppu_addr
+
+        LDA ppu_addr+1
+        ADC #$20
+        STA ppu_addr+1
 
         RTS
 .endproc

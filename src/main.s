@@ -32,12 +32,15 @@
 
 .segment "ZEROPAGE"
 
+buffer:     .res 3
+
 .segment "BSS"
 
 .segment "TEXT"
 
 .include "nmi.inc"
 .include "shell.inc"
+.include "std.inc"
 
 .proc MAIN
         LDA #$80
@@ -48,15 +51,34 @@
 
         LDA #%10000000
         STA ppu_ctrl
-        LDA #%00011000
+        LDA #%00011110
         STA ppu_mask
 
         JSR CLEAR
 
+        LDA #$02
+        LDX #$02
+        JSR MOVE
+
         LDA #<STR
         LDX #>STR
-
         JSR PUTS
+
+        LDY #<buffer
+        LDX #>buffer
+        LDA #$F4
+        JSR HTOA
+
+        LDA #$04
+        LDX #$02
+        JSR MOVE
+
+        LDA #<buffer
+        LDX #>buffer
+        JSR PUTS
+
+        LDA #':'
+        JSR PUTC
 
     LOOP:
         ;
