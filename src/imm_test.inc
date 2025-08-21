@@ -28,96 +28,11 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
-.export MAIN
+.ifndef imm_test
+imm_test = 0
 
-.segment "ZEROPAGE"
+.global IMM_TEST_INIT
 
-buffer:     .res 3
+.global IMM_TEST_SHOW
 
-.segment "BSS"
-
-.segment "TEXT"
-
-.include "nmi.inc"
-.include "shell.inc"
-.include "std.inc"
-.include "imm_test.inc"
-
-.proc MAIN
-        LDA #$80
-        STA $2000
-
-        JSR PPU_INIT
-        JSR LOAD_PALETTE
-
-        LDA #%10000000
-        STA ppu_ctrl
-        LDA #%00011110
-        STA ppu_mask
-
-        JSR CLEAR
-
-        LDA #$02
-        LDX #$02
-        JSR MOVE
-
-        LDA #<STR
-        LDX #>STR
-        JSR PUTS
-
-        LDY #<buffer
-        LDX #>buffer
-        LDA #$F4
-        JSR HTOA
-
-        LDA #$04
-        LDX #$02
-        JSR MOVE
-
-        LDA #<buffer
-        LDX #>buffer
-        JSR PUTS
-
-        LDA #':'
-        JSR PUTC
-
-        LDA #$00
-        LDX #$02
-        JSR MOVE
-
-        JSR IMM_TEST_INIT
-        JSR IMM_TEST_SHOW
-
-    LOOP:
-        ;
-        JMP LOOP
-.endproc
-
-.proc LOAD_PALETTE
-        LDX #$00
-    LOOP:
-        LDA PALETTE, X
-        STA pal_buffer, X
-        INX
-        CPX #$20
-        BNE LOOP
-
-        LDA #01
-        STA pal_update
-
-        RTS
-.endproc
-
-PALETTE:
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-
-STR:
-    .asciiz "Hello, World!"
+.endif
