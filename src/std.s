@@ -33,6 +33,7 @@
 .segment "ZEROPAGE"
 
 ptr:        .res 2
+ctrl1:      .res 1
 
 .segment "TEXT"
 
@@ -65,6 +66,7 @@ ptr:        .res 2
         LSR
         LSR
 
+        CLC
         ADC #$30
 
         ; Check if it should be a letter
@@ -100,6 +102,24 @@ ptr:        .res 2
         ; Make the string NUL-terminated.
         LDA #$00
         STA (ptr), Y
+
+        RTS
+.endproc
+
+CTRL1 = $4016
+
+.proc READCTRL1
+        LDA #$01
+        STA CTRL1
+        STA ctrl1
+        LSR
+        STA CTRL1
+
+    LOOP:
+        LDA CTRL1
+        LSR
+        ROL ctrl1
+        BCC LOOP
 
         RTS
 .endproc

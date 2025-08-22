@@ -41,7 +41,14 @@ std_inc = 0
 ; Pass the ptr in XY (upper byte in X and lower byte in Y).
 .global HTOA
 
+; Get the controller 1 output in ctrl1.
+; Uses A
+.global READCTRL1
+
 ; A pointer used by various subroutines.
 .globalzp ptr
+
+; The controller 1 input read by READCTRL1
+.globalzp ctrl1
 
 .endif

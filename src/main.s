@@ -32,8 +32,6 @@
 
 .segment "ZEROPAGE"
 
-buffer:     .res 3
-
 .segment "BSS"
 
 .segment "TEXT"
@@ -57,36 +55,10 @@ buffer:     .res 3
 
         JSR CLEAR
 
-        LDA #$02
-        LDX #$02
-        JSR MOVE
-
-        LDA #<STR
-        LDX #>STR
-        JSR PUTS
-
-        LDY #<buffer
-        LDX #>buffer
-        LDA #$F4
-        JSR HTOA
-
-        LDA #$04
-        LDX #$02
-        JSR MOVE
-
-        LDA #<buffer
-        LDX #>buffer
-        JSR PUTS
-
-        LDA #':'
-        JSR PUTC
-
-        LDA #$00
-        LDX #$02
-        JSR MOVE
-
         JSR IMM_TEST_INIT
-        JSR IMM_TEST_SHOW
+        JSR IMM_TEST_DRAW
+        JSR IMM_TEST_RUN
+        JSR IMM_TEST_MAINLOOP
 
     LOOP:
         ;

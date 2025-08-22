@@ -33,6 +33,10 @@ imm_test = 0
 
 .global IMM_TEST_INIT
 
-.global IMM_TEST_SHOW
+.global IMM_TEST_DRAW
+
+.global IMM_TEST_RUN
+
+.global IMM_TEST_MAINLOOP
 
 .endif
