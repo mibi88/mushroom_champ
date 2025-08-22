@@ -33,6 +33,7 @@
 .include "imm_test.inc"
 .include "shell.inc"
 .include "std.inc"
+.include "opcodes.inc"
 
 .segment "TEXT"
 
@@ -455,6 +456,20 @@ IMM_TEST_INPUT_LUT:
         LDA opcode
         STA code+(BASE_CODE_OPCODE-BASE_CODE)
 
+        ; Check if it is an immediate addressing opcode
+        TAX
+        LDA ADDRESSING_MODES, X
+        CMP #IMMEDIATE
+        BNE INVALID
+
+        LDA #(30-5)
+        LDX #$02
+        JSR MOVE
+
+        LDA #<RUNNING_STR
+        LDX #>RUNNING_STR
+        JSR PUTS
+
         LDX start
         LDY #$08
         STY tmp_y
@@ -517,5 +532,36 @@ IMM_TEST_INPUT_LUT:
         BNE LOOP
 
     DONE:
+        LDA #(30-5)
+        LDX #$02
+        JSR MOVE
+
+        LDA #<LINE_STR
+        LDX #>LINE_STR
+        JSR PUTS
+
+        RTS
+
+    INVALID:
+        LDA #(30-5)
+        LDX #$02
+        JSR MOVE
+
+        LDA #<INVALID_OP_STR
+        LDX #>INVALID_OP_STR
+        JSR PUTS
+
         RTS
 .endproc
+
+INVALID_OP_STR:
+    .asciiz "ERROR: Invalid opcode!"
+
+RUNNING_STR:
+    .asciiz "Running... Please wait..."
+
+LINE_STR:
+    .repeat 32
+    .byte ' '
+    .endrepeat
+    .byte $00
