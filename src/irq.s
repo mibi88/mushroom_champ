@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;

@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -28,6 +28,9 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
+.include "region.inc"
+.include "ppu.inc"
+
 .segment "HEADER"
 
 .byte "NES"
@@ -37,8 +40,8 @@
 .byte %00000000 ; mapper + mirorring
 .byte $00
 .byte $00
-.byte %00000001
-.byte $00
+.byte %00000000 ; TV system
+.byte %00110001 ; Bus conflicts, no PRG ram, compatible with both PAL and NTSC
 .byte $00, $01, $00, $00, $00
 
 .segment "STARTUP"
@@ -96,7 +99,28 @@
         BIT $2002
         BPL WAIT_VBLANK2
 
-        TXA
+        ; Checking TV System as described in
+        ; https://forums.nesdev.org/viewtopic.php?p=163258#p163258
+        LDX #$00
+        LDY #$00
+    XLOOP:
+        INX
+        BNE SKIPY ; Branch if X != 0
+        INY
+    SKIPY:
+        ; Check for vblank
+        BIT PPUSTATUS ; Waiting for VBLANK.
+        BPL XLOOP
+        ; Adapt speed to the region
+        CPY #$09
+        BEQ IS_NTSC
+        CPY #$13
+        BEQ IS_NTSC
+        ; PAL
+        LDA #PAL
+    IS_NTSC:
+        ; NTSC
+        LDA #NTSC
 
         JMP MAIN
 .endproc

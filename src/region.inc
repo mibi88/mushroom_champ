@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -28,15 +28,6 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
-.ifndef imm_test
-imm_test = 0
 
-.global IMM_TEST_INIT
-
-.global IMM_TEST_DRAW
-
-.global IMM_TEST_RUN
-
-.global IMM_TEST_MAINLOOP
-
-.endif
+NTSC = 0
+PAL  = 1

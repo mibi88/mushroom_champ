@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -28,23 +28,37 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
-.ifndef opcodes_inc
-opcodes_inc = 0
+.ifndef gfx_inc
+gfx_inc = 0
 
-; All this data was taken from my rudimentary assembler written in JS.
+; Get the controller 1 output in ctrl1.
+;
+; Clobbers A
+.global READ_CTRL1
 
-ACCUMULATOR         = 0
-IMMEDIATE           = 1
-ABSOLUTE            = 2
-ZERO_PAGE           = 3
-INDEXED_ZERO_PAGE   = 4
-INDEXED_ABSOLUTE    = 5
-IMPLIED             = 6
-RELATIVE            = 7
-INDEXED_INDIRECT    = 8  ; (Indirect, X)
-INDIRECT_INDEXED    = 9  ; (Indirect), Y
-ABSOLUTE_INDIRECT   = 10
+; Get the controller 2 output in ctrl2.
+;
+; Clobbers A
+.global READ_CTRL2
 
-.global ADDRESSING_MODES
+; Load a palette from a pointer in AX (lower byte in A)
+;
+; Clobbers A, Y
+.global LOAD_PALETTE
+
+; Set the PPU address.
+;
+; Clobbers Y
+.global SET_PPU_ADDR
+
+; Load a RLE compressed nametable, which is zero terminated.
+;
+; Clobbers A, X, Y
+.global LOAD_RLE_NAM
+
+; The controller 1 input read by READ_CTRL1
+.globalzp ctrl1
+; The controller 2 input read by READ_CTRL2
+.globalzp ctrl2
 
 .endif

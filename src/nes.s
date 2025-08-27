@@ -28,79 +28,133 @@
 ; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ; POSSIBILITY OF SUCH DAMAGE.
 
+.include "nes.inc"
+
 .include "std.inc"
+.include "nmi.inc"
 
 .segment "ZEROPAGE"
 
-ptr:        .res 2
+max:        .res 1
+tmp_y:      .res 1
+
+ctrl1:      .res 1
+ctrl2:      .res 1
 
 .segment "TEXT"
 
-.proc STRLEN
+CTRL1 = $4016
+
+.proc READ_CTRL1
+        LDA #$01
+        STA CTRL1
+        STA ctrl1
+        LSR
+        STA CTRL1
+
+    LOOP:
+        LDA CTRL1
+        LSR
+        ROL ctrl1
+        BCC LOOP
+
+        RTS
+.endproc
+
+CTRL2 = $4017
+
+.proc READ_CTRL2
+        LDA #$01
+        STA CTRL2
+        STA ctrl2
+        LSR
+        STA CTRL2
+
+    LOOP:
+        LDA CTRL2
+        LSR
+        ROL ctrl2
+        BCC LOOP
+
+        RTS
+.endproc
+
+.proc LOAD_PALETTE
+        STA ptr
+        STX ptr+1
+
+        LDY #$00
+    LOOP:
+        LDA (ptr), Y
+        STA pal_buffer, Y
+        INY
+        CPY #$20
+        BNE LOOP
+
+        LDA #01
+        STA pal_update
+
+        RTS
+.endproc
+
+.proc SET_PPU_ADDR
+        ; Wait for all the bytes of the buffer to be loaded before changing the
+        ; target address.
+    WAIT:
+        LDY nam_cur
+        BNE WAIT
+
+        STA ppu_addr
+        STX ppu_addr+1
+
+        RTS
+.endproc
+
+.proc LOAD_RLE_NAM
         STA ptr
         STX ptr+1
 
         LDY #$00
 
-    LOOP:
+    LOAD_LOOP:
+        LDA (ptr), Y
+        BEQ END
+    LOAD_LOOP_SKIP_LOAD:
+        STA max
         INY
         LDA (ptr), Y
-        BNE LOOP
 
-    DONE:
-        RTS
-.endproc
+        STY tmp_y
+        LDX #$00
+    BUFFER_WRITE_LOOP:
 
-.proc HTOA
-        STY ptr
-        STX ptr+1
+        LDY nam_max
+    WAIT_ON_LIMIT:
+        CPY nam_cur
+        BEQ WAIT_ON_LIMIT
 
-        LDY #$00
+        LDY nam_cur
+        STA nam_buffer, Y
+        INC nam_cur
 
-        TAX
+        INX
+        CPX max
+        BNE BUFFER_WRITE_LOOP
 
-        ; Get the high nibble
-        LSR
-        LSR
-        LSR
-        LSR
+    BUFFER_WRITE_LOOP_END:
 
-        CLC
-        ADC #$30
-
-        ; Check if it should be a letter
-        CMP #$3A
-        BCC NOT_ALPHA2
-
-        ; Make it a letter
-        ADC #($41-$3A-1)
-    NOT_ALPHA2:
-
-        STA (ptr), Y
+        LDY tmp_y
         INY
+        BNE LOAD_LOOP
 
-        ; Get the low nibble
-        TXA
+        ; Y wrapped to 0
 
-        AND #$0F
+        INC ptr+1
+        ; If the next tile should be repeated 0 times, we exit the loop. I'm
+        ; using it to mark the end of the nametable.
+        LDA (ptr), Y
+        BNE LOAD_LOOP_SKIP_LOAD
 
-        CLC
-        ADC #$30
-
-        ; Check if it should be a letter
-        CMP #$3A
-        BCC NOT_ALPHA
-
-        ; Make it a letter
-        ADC #($41-$3A-1)
-    NOT_ALPHA:
-
-        STA (ptr), Y
-        INY
-
-        ; Make the string NUL-terminated.
-        LDA #$00
-        STA (ptr), Y
-
+    END:
         RTS
 .endproc

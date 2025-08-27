@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -31,13 +31,15 @@
 .ifndef nmi_inc
 nmi_inc = 0
 
+; Initialize the NMI-routine related code
+;
+; Clobbers A, X
 .global   PPU_INIT
-
 
 .global   nam_buffer
 .global   pal_buffer
 
-.globalzp nam_min
+.globalzp nam_max
 .globalzp nam_cur
 
 .globalzp nam_x

@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -37,59 +37,52 @@
 .segment "TEXT"
 
 .include "nmi.inc"
-.include "shell.inc"
 .include "std.inc"
-.include "imm_test.inc"
+.include "nes.inc"
+.include "ppu.inc"
 
 .proc MAIN
         LDA #$80
         STA $2000
 
         JSR PPU_INIT
-        JSR LOAD_PALETTE
 
         LDA #%10000000
         STA ppu_ctrl
-        LDA #%00011110
+        STA PPUCTRL
+        LDA #%00000000
         STA ppu_mask
 
-        JSR CLEAR
+        LDX #>PALETTE
+        LDA #<PALETTE
+        JSR LOAD_PALETTE
 
-        JSR IMM_TEST_INIT
-        JSR IMM_TEST_DRAW
-        JSR IMM_TEST_RUN
-        JSR IMM_TEST_MAINLOOP
+        LDX #$20
+        LDA #$00
+        JSR SET_PPU_ADDR
+
+        LDX #>TITLE_NAM
+        LDA #<TITLE_NAM
+        JSR LOAD_RLE_NAM
+
+        LDA #%00011110
+        STA ppu_mask
 
     LOOP:
         ;
         JMP LOOP
 .endproc
 
-.proc LOAD_PALETTE
-        LDX #$00
-    LOOP:
-        LDA PALETTE, X
-        STA pal_buffer, X
-        INX
-        CPX #$20
-        BNE LOOP
-
-        LDA #01
-        STA pal_update
-
-        RTS
-.endproc
-
 PALETTE:
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
+    .byte $08, $16, $26, $36
+    .byte $08, $07, $17, $37
+    .byte $08, $10, $31, $20
+    .byte $08, $00, $10, $30
 
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
-    .byte $1D, $00, $10, $30
+    .byte $08, $00, $10, $30
+    .byte $08, $00, $10, $30
+    .byte $08, $00, $10, $30
+    .byte $08, $00, $10, $30
 
-STR:
-    .asciiz "Hello, World!"
+TITLE_NAM:
+    .incbin "data/title.nam.rle"

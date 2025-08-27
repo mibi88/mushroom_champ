@@ -1,4 +1,4 @@
-; NES accuracy tests.
+; Mushroom farming simulation game.
 ;
 ; Copyright (c) 2025 Mibi88.
 ;
@@ -37,9 +37,7 @@
 
 nam_cur:        .res 1 ; The cursor in the nametable buffer (initialized to $FF
                        ; and decremented for each byte.
-nam_min:        .res 1 ; The minimum value for the cursor, which is reached
-                       ; when the maximum number of bytes are loaded into the
-                       ; buffer
+nam_max:        .res 1 ; The maximum number of bytes that can be loaded at once
 
 nam_x:          .res 1
 nam_y:          .res 1
@@ -64,8 +62,8 @@ pal_buffer:     .res $20
 
 .proc PPU_INIT
         ; TODO: Tweak this limit once the NMI handler is finished
-        LDA #$60
-        STA nam_min
+        LDA #$40
+        STA nam_max
 
         LDX #$00
         STX nam_x
@@ -124,24 +122,24 @@ pal_buffer:     .res $20
 
         ; Load the palette
 
-        LDX #$00
+        LDX #($100-$20)
 
     PAL_LOAD_LOOP:
-        LDA pal_buffer, X
+        LDA pal_buffer-($100-$20), X
         STA PPUDATA
         INX
-        CPX #$20
         BNE PAL_LOAD_LOOP
+
+        STX pal_update
 
     PAL_LOAD_SKIP:
 
         ; NAMETABLE LOADING CODE
 
         LDX nam_cur
-        CPX #$FF
         BEQ NAM_LOAD_SKIP
 
-        INX
+        LDX #$00
 
         ; Load the target address
         LDA ppu_addr+1
@@ -155,10 +153,10 @@ pal_buffer:     .res $20
         LDA nam_buffer, X
         STA PPUDATA
         INX
+        CPX nam_cur
         BNE NAM_LOAD_LOOP
 
         LDA nam_cur
-        EOR #$FF
         CLC
         ADC ppu_addr
         STA ppu_addr
@@ -166,7 +164,7 @@ pal_buffer:     .res $20
         ADC #$00
         STA ppu_addr+1
 
-        LDA #$FF
+        LDA #$00
         STA nam_cur
 
     NAM_LOAD_SKIP:
